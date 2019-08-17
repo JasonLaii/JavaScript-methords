@@ -1,0 +1,87 @@
+<!--
+ * @Author: Jason
+ * @Date: 2019-08-16 19:26:36
+ * @Github: https://github.com/JasonLaii
+ * @Description: 
+ * @LastEditTime: 2019-08-16 19:45:57
+ -->
+
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>防抖</title>
+  <style>
+  #container{
+    width: 400px;
+    height: 200px;
+    line-height: 200px;
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-size: 30px;
+  }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+
+  <script>
+    let container  = document.getElementById('container');
+    let count = 1;
+
+    function plus(e){
+      container.innerHTML = count++;
+      console.log(this);
+      console.log(e);
+    }
+
+    //防抖的原理是 在触发事件 n 秒 后才执行事件
+    function debounce(fn,wait){
+      let timeout;
+      
+      return function(){
+        let context = this;
+        let args = arguments;
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          fn.apply(context,args)
+        }, wait);
+      }
+    }
+    // container.onmousemove = debounce(plus,1000);
+  
+
+    //倘若我们希望 触发事件后立刻执行一次事件
+    //添加一个参数 immediate , 为 true 立刻执行, false 则 n 秒后执行
+
+    function debounceii(fn,wait,immediate){
+      let timeout;
+      let visited = immediate;
+
+      return function(){
+        let context = this;
+        let args = arguments;
+        
+        if(immediate && visited){
+          fn.apply(context,args);
+
+          visited = false;
+        }else{
+          
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            fn.apply(context,args);
+          }, wait);
+        }
+      }
+    }
+    container.onmousemove = debounceii(plus,1000,true);
+    container.onmousemove = debounceii(plus,1000,false);
+  </script>
+</body>
+</html>

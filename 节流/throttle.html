@@ -1,0 +1,122 @@
+<!--
+ * @Author: Jason
+ * @Date: 2019-08-16 16:11:41
+ * @Github: https://github.com/JasonLaii
+ * @Description: 
+ * @LastEditTime: 2019-08-16 19:31:50
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>节流</title>
+    <style>
+      #container {
+        width: 400px;
+        height: 200px;
+        background-color: black;
+        font-size: 30px;
+        line-height: 200px;
+        color: white;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <script>
+      let container = document.getElementById("container");
+      let count = 1;
+      function plus(e) {
+        container.innerHTML = count++;
+        console.log(this);
+        console.log(e);
+      }
+
+      //节流的原理是 持续触发事件， 每隔 n 秒 执行一次事件
+      // 通过timestamp 实现
+      function throttle(fn, wait) {
+        let previous = 0;
+
+        return function() {
+          let now = +new Date();
+          let context = this;
+          let args = arguments;
+
+          if (now - previous > wait) {
+            fn.apply(context, args);
+            previous = +new Date();
+          }
+        };
+      }
+      // container.onmousemove = throttle(plus,1000);
+
+      //通过 定时器实现
+      function throttleii(fn, wait) {
+        let timeout;
+        return function() {
+          let context = this;
+          let args = arguments;
+
+          if (!timeout) {
+            timeout = setTimeout(() => {
+              timeout = null;
+              fn.apply(context, args);
+            }, wait);
+          }
+        };
+      }
+      // container.onmousemove = throttleii(plus,1000);
+
+      // 以上两种方法的主要区别是
+      // 通过timestamp实现 方法立刻执行，然后再在规定时间内执行，最后移除鼠标如果不够规定时间则不会再执行
+      // 通过定时器实现     在规定时间内执行，最后移出鼠标后在还会执行一次
+
+      //设置第三个参数 判断是否要立刻执行或在鼠标移出后再执行一次
+      // option:{
+      //  leading: false,
+      //  trailing: false
+      //}
+      function throttleiii(fn, wait, options) {
+        if (!options) options = {};
+        let timeout;
+        let previous = 0;
+        return function() {
+          let now = +new Date();
+          let context = this;
+          let args = arguments;
+
+          if (options.leading === false) previous = +new Date();
+
+          if (now - previous > wait) {
+            
+            if(timeout){
+              clearTimeout(timeout);
+              timeout = null;
+            }
+            fn.apply(context, args);
+            previous = +new Date();
+          }else if(!timeout){
+            
+            if(options.trailing !==false){
+
+              timeout = setTimeout(() => {
+                clearTimeout(timeout);
+                timeout = null;
+                fn.apply(context,args);
+              }, wait);
+            }
+          }
+        };
+      }
+      // container.onmousemove = throttleiii(plus,1000);
+      // container.onmousemove = throttleiii(plus,1000,{leading: false});
+      // container.onmousemove = throttleiii(plus,1000,{trailing: false});
+      
+    </script>
+  </body>
+</html>
